@@ -1,0 +1,43 @@
+# Overview of Linux Filesystems
+
+> **Key Question**: How can we design filesystems to store and manipulate files on disk?
+
+![](./filesystem-inode-design.png)
+
+- Linux and C libraries for file manipulation: `stat`, `struct stat`, `open`, `close`, `read`, `write`, `readdir`, `struct dirent`, file descriptors, regular files, directories, soft and hard links, programmatic manipulation of them, implementation of `ls`, `cp`, `cat`, etc.
+- Naming, abstraction and layering concepts in systems as a means for managing complexity, blocks, `inode`s, `inode` pointer structure, `inode` as abstraction over blocks, direct blocks, indirect blocks, doubly indirect blocks, design and implementation of a file system.
+- Additional systems examples that rely on naming, abstraction, modularity, and layering, including DNS, TCP/IP, network packets, databases, HTTP, REST, descriptors and `pid`s.
+- Building modular systems with simultaneous goals of simplicity of implementation, fault tolerance, and flexibility of interactions.
+
+## Lectures
+
+- Lecture 01: Introductions
+
+  Introductions, course administration and expectations.
+
+  - Readings: S & K Chapter 2
+
+- Lecture 02: Filesystems, APIs, and System Calls
+
+  We need to invest some time learning about some C and some UNIX/Linux libraries that offer us programmatic access to the file system. There are a few data structures and a collection of Linux library functions that allow us to crawl over the tree of files and directories, and there are even more functions that grant us raw, low-level access to the file contents. We'll invest some time discussing these functions and data structures—enough that we can implement a collection of obvious and not-so-obvious programs that emulate some of the terminal/shell builtins you've been using your entire UNIX lives.
+
+  - Readings: S & K Chapter 2
+
+- Lecture 03: More on Filesystems APIs
+
+  We'll work through a few more UNIX Filesystem API examples before advancing on to a discussion of how the raw hardware of a disk is leveraged to look like the filesystem you've taken for granted for the entirety of your UNIX and programming careers. (We've done a little bit of this already, but we will extend our discussion of how a filesystem is implemented to include directories and symbolic links.) We also will talk about how human-friendly names like `/usr/local/lib/python` and `/usr/include/stdio.h` are parsed by the filesystem to locate the relevant inode.
+
+- Lecture 04: Filesystems Wrap, Introduction to Multiprocessing
+
+  Finish up filesystems, speak of layering and naming as basic principles of system design, move on to multiprocessing.
+
+  - Readings: Bryant & O'Hallaron, Chapters 10 and 8.
+
+## Labs
+
+- Lab 01: File Systems and System Calls
+
+## Assignments
+
+- Assignment 1: Six Degrees of Kevin Bacon
+- Assignment 2: Unix v6 Filesystems

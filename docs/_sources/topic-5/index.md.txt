@@ -1,0 +1,12 @@
+# Additional Topics
+
+- [MapReduce](http://research.google.com/archive/mapreduce.html) programming model, implementation strategies using multiple threads and/or processes, comparison to previous systems that do the same thing, but not as well.
+- Caching, memory hierarchies, registers, L1, L2 and L3 caches, main memory, disk, swap space, data locality, temporal locality, custom caches, cache replacement policies (LRU, MRU, TLRU, and so forth), profiling tools, `callgrind`, `cachegrind`, and alternatives
+- Non-blocking I/O, where normally slow system calls like `open`, `accept`, `read`, and `write` return immediately instead of blocking, `select`, `epoll_*` set of functions, `libev` and `libuv` open source libraries.
+
+## Lectures
+
+## Labs
+
+
+## Assignments

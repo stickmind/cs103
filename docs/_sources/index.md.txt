@@ -1,0 +1,48 @@
+# Welcome to CS103!
+
+```{toctree}
+:hidden:
+
+topic-1/index
+topic-2/index
+topic-3/index
+topic-4/index
+topic-5/index
+```
+
+[CS103](./index.md) is an introductory operating systems course. The [CS101](https://cs101.stickmind.com) courses provide you with a solid foundation in programming methodology and abstractions, and [CS102](https://cs102.stickmind.com) builds up and expands your breadth and depth of programming experience and techniques, working from the C programming language down to the microprocessor to de-mystify the machine. [CS103](./index.md) leverages this programming experience to introduce operating systems and how they work. With an understanding of both how to leverage operating system functionality in your own programs as well as how operating systems manage tasks behind the scenes, you will have a better understanding of how operating systems work, the kinds of design challenges present in operating systems and other large systems, and key computing ideas such as virtualization that are applicable in many different areas. Topics covered include: filesystems, system calls, concurrency, multiprocessing, multithreading, race conditions, synchronization primitives, virtual memory, demand paging and operating system design challenges.
+
+## Prerequisites
+
+Formally, the course prerequisite is [CS102](https://cs102.stickmind.com). Informally, you need to be familiar with the C and C++ programming languages, Unix/Linux,  `make`, `Makefile`s, `gcc`/`g++`, `valgrind`, `gdb`, and have some experience with basic computer architecture (x86-64 as it’s taught in [CS102](https://cs102.stickmind.com), or exposure to some other architecture with the confidence and ability to pick up x86-64 as we reference it).
+
+We'll be coding in a mixture of C and C++ throughout the quarter:
+
+- Why C? Because the libraries needed to interface with system resources are written in it.
+- Why C++? Because the projects become large enough that we prefer to go with a language that supports encapsulation and generic programming better than C does.
+
+You should understand pointers, dynamic memory allocation (`malloc`/`realloc`/`free`), and C strings well enough that you're not intimidated by them.  You should understand C++ classes, methods, references, templates, and C++’s `new` and `delete` operators. There are C++ features you're not expected to know, but you should have enough programming maturity to pick those features up and search the web for reference materials as needed.
+
+The first assignment, which goes out on Tuesday of the first week, is a systems programming assignment that should bring all relevant [CS102](https://cs102.stickmind.com) and software development skills back into rotation.  If you haven't taken [CS102](https://cs102.stickmind.com) or programmed in C and C++ before, but you're able to work through our first assignment without too much drama, then you are more than qualified to take [CS103](./index.md).
+
+## Readings
+
+- The first required textbook is **Computer Systems: A Programmer's Perspective** by Bryant and O'Hallaron, 3rd edition.
+  - Both [CS102](https://cs102.stickmind.com) and [CS103](./index.md) teach from a subset of the B&O textbook.
+  - Examples in book are in C, though we'll migrate to C++. (Good to know pros and cons of both)
+
+- The second required textbook is **Principles of Computer System Design: An Introduction** by Jerome H. Saltzer and M. Frans Kaashoek.
+
+## Topics
+
+1. **Overview of Linux Filesystems** - How can we design filesystems to store and manipulate files on disk?
+2. **Multiprocessing and Exceptional Control Flow** - How can our program create and interact with other programs?
+3. **Threading and Concurrency** - How can a single instance of our program perform multiple coordinated tasks at the same time?
+4. **Networking and Distributed Computing** - How can we write programs that communicate over a network with other programs, and tackle large tasks using many machines?
+5. **Additional Topics**: MapReduce, Caching, and Non-Blocking I/O
+
+## Assignments
+
+There will be six programming assignments—that’s guaranteed. Assignments will, on average, require 10 - 20 hours per week to complete and will help you learn the material being exercised. We work very hard to craft each assignment to be as focused and as rewarding as possible. Each assignment requires you to draw upon your systems knowledge to build something you yourself might encounter regularly, such as a shell, a proxy, or a debugging tracer (a la `strace`/`dtrace`).
+
+Assignment grades have two components: functionality and style. Functionality is graded by a series of automated tests and is worth 85% of your assignment grade. Style is graded on a bucket system (solid, minor problems, major problems, etc.) and is worth 15% of your grade. Programming style is important, but in the end, we care most that your code does what it’s supposed to do. All assignments are weighted equally.

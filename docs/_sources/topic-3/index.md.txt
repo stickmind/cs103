@@ -1,0 +1,19 @@
+# Threading and Concurrency
+
+> **Key Question**: How can a single instance of our program perform multiple coordinated tasks at the same time?
+
+![](./nginx-and-thread-pools.png)
+
+- Sequential programming, VLIW concept, desire to emulate the real world with parallel threads, freeof-charge exploitation of multiple cores (eight per `myth` machine, eight per `rice` machine), pros and cons of `thread`ing versus `fork`ing.
+- C++ `thread`s, `thread` construction using function pointers, blocks, functors, `join`, `detach`, race conditions, `mutex`, IA32 implementation of `lock` and `unlock`, spin-lock, busy waiting, preemptive versus cooperative multithreading, `yield`, `sleep_for`.
+- Condition variables, rendezvous and thread communication, `lock_guard`, `wait`, `notify_one`, `notify_all`, deadlock, busy waiting.
+- Semaphore concept and `semaphore` implementation, generalized counter, pros and cons of `semaphore` versus exposed condition variables, thread pools, cost of threads versus processes.
+- Active threads, blocked threads, ready thread queue, high-level implementation details of the thread manager, `mutex`, and `condition_variable_any`.
+- Pure C alternatives via `pthread`s, pros of `pthread`s over C++ thread package.
+
+## Lectures
+
+## Labs
+
+
+## Assignments

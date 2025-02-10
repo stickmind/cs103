@@ -1,0 +1,18 @@
+# Multiprocessing and Exceptional Control Flow
+
+> **Key Question**: How can our program create and interact with other programs?
+
+![](./chrome-site-isolation.png)
+
+- Introduction to multiprocessing, `fork`, `waitpid`, `execvp`, process ids, inter-process communication, context switches, user versus supervisor mode.
+- Protected address spaces, virtual memory, main memory as cache, virtual to physical address mapping.
+- Concurrency versus parallelism, multiple cores versus multiple processors, concurrency issues with multiprocessing.
+- Interrupts, faults, systems calls, signals, design and implementation of a simple shell.
+- Virtualization as a general systems principle, with a discussion of processes, RAID, load balancers, AFS servers and clients.
+
+## Lectures
+
+## Labs
+
+
+## Assignments

@@ -1,0 +1,19 @@
+# Networking and Distributed Computing
+
+> **Key Question**: How can we write programs that communicate over a network with other programs, and tackle large tasks using many machines?
+
+![](./dataflow-spotify-wrapped.png)
+
+- Client-server model, peer-to-peer model, protocols, request and response as a way to organize modules and their interactions to support a clear set of responsibilities.
+- Stateless versus keep-alive connections, latency and throughput issues, `gethostbyname`, `gethostbyaddr`, IPv4 versus IPv6, `struct sockaddr` hierarchy of `structs`, network-byte order.
+- Ports, socket file descriptors, `socket`, `connect`, `bind`, `accept`, `read`, `write`, simple echo server, time server, concurrency issues, spawning threads to isolate and manage single conversations.
+- C++ layer over raw I/O file descriptors, introduction to `sockbuf` and `sockstream` C++ classes.
+- HTTP 1.0 and 1.1, header fields, `GET`, `HEAD`, `POST`, complete versus chunked payloads, response codes, web caching and consistency protocols.
+- IMAP, custom protocols, Dropbox and iCloud reliance on variations of HTTP.
+
+## Lectures
+
+## Labs
+
+
+## Assignments
