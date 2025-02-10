@@ -1,0 +1,853 @@
+<!doctype html>
+<html class="no-js" lang="zh-CN" data-content_root="../../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Filesystem System Call" href="../filesystem-2/index.html" /><link rel="prev" title="Overview of Unix Filesystems" href="../index.html" />
+
+    
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+        <title>Filesystem Design - CS103 Operating Systems Principles</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/tabs.css?v=4c969af8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pied-piper-admonition.css?v=e32e2275" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">CS103 Operating Systems Principles</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  
+  <span class="sidebar-brand-text">CS103 Operating Systems Principles</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="搜索" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../topic-0/index.html">Resources</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../index.html">Overview of Unix Filesystems</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Overview of Unix Filesystems</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Filesystem Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../filesystem-2/index.html">Filesystem System Call</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../assign-1/index.html">Assignment 1. Reading Unix v6 File Systems</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../topic-2/index.html">Multiprocessing and Exceptional Control Flow</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Multiprocessing and Exceptional Control Flow</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../topic-2/multiprocessing/index.html">Multiprocessing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../topic-3/index.html">Threading and Concurrency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../topic-4/index.html">Networking and Distributed Computing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../topic-5/index.html">Additional Topics</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>返回顶部</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="filesystem-design">
+<h1>Filesystem Design<a class="headerlink" href="#filesystem-design" title="Link to this heading">¶</a></h1>
+<section id="data-storage-and-access">
+<h2>Data Storage and Access<a class="headerlink" href="#data-storage-and-access" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>The stack, heap and other segments of program data live in <strong>memory (RAM)</strong></p>
+<ul>
+<li><p>fast</p></li>
+<li><p>byte-addressable: can quickly access any byte of data by address, but not individual bits by address</p></li>
+<li><p>not persistent - cannot store data between power-offs</p></li>
+</ul>
+</li>
+<li><p>The filesystem lives on <strong>disk (eg. hard drives)</strong></p>
+<ul>
+<li><p>slower</p></li>
+<li><p>persistent - stores data between power-offs</p></li>
+<li><p>sector-addressable: cannot read/write just one byte of data - can only read/write “sectors” of data</p></li>
+</ul>
+</li>
+</ul>
+<section id="sector-addressable">
+<h3>Sector-Addressable<a class="headerlink" href="#sector-addressable" title="Link to this heading">¶</a></h3>
+<ul>
+<li><p>Hard disks are <em>sector-addressable</em>: cannot read/write just one byte of data - can only read/write “sectors” of data. (We will work with a sector size of 512; but size is determined by the physical drive).</p>
+<figure class="align-center" id="id1">
+<a class="reference internal image-reference" href="../../_images/filesystem-sector-addressable.png"><img alt="../../_images/filesystem-sector-addressable.png" src="../../_images/filesystem-sector-addressable.png" style="width: 80%;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><cite>A hard disk is sector-addressable</cite></span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</li>
+<li><p>If we are the OS, the hard disk creators might provide this API (“application programming interface”)——a set of public functions——to interface with the disk:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">readSector</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">sectorNumber</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">writeSector</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">sectorNumber</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>This is all we get! We (the OS) must build a filesystem by layering functions on top of these to ultimately allow us to read, write, lookup, and modify entire files.</p>
+</li>
+<li><p>How do we use <code class="docutils literal notranslate"><span class="pre">readSector</span></code>? Here are some examples:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">char</span><span class="w"> </span><span class="n">text</span><span class="p">[</span><span class="mi">512</span><span class="p">];</span>
+<span class="n">readSector</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="n">text</span><span class="p">);</span><span class="w"> </span><span class="c1">// Now text contains the contents of sector 5</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="n">nums</span><span class="p">[</span><span class="mi">512</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">)];</span>
+<span class="n">readSector</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="n">nums</span><span class="p">);</span><span class="w"> </span><span class="c1">// Now nums contains the contents of sector 6</span>
+</pre></div>
+</div>
+</li>
+<li><p>How do we use <code class="docutils literal notranslate"><span class="pre">writeSector</span></code>? Here are some examples:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">char</span><span class="w"> </span><span class="n">text</span><span class="p">[</span><span class="mi">512</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Hello, world!&quot;</span><span class="p">;</span>
+<span class="n">writeSector</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="n">text</span><span class="p">);</span><span class="w"> </span><span class="c1">// Now sector 5 contains &quot;Hello, world!&quot; (and \0)</span>
+<span class="w">                      </span><span class="c1">// followed by garbage values.</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="n">nums</span><span class="p">[</span><span class="mi">512</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">)];</span>
+<span class="n">readSector</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="n">nums</span><span class="p">);</span>
+<span class="n">nums</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">22</span><span class="p">;</span>
+<span class="n">writeSector</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="n">nums</span><span class="p">);</span><span class="w"> </span><span class="c1">// Now sector 6 is updated to change its 16th number to be 22.</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+</section>
+<section id="filesystem-goals">
+<h2>Filesystem Goals<a class="headerlink" href="#filesystem-goals" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>We want to read/write file on disk and have them persist even when the device is off.</p></li>
+<li><p>This may include operations like:</p>
+<ul>
+<li><p>creating a new file on disk</p></li>
+<li><p>looking up the location of a file on disk</p></li>
+<li><p>reading/editing all or part of an existing file from disk, e.g. sequential and random access</p></li>
+<li><p>creating folders on disk</p></li>
+<li><p>getting the contents of folders on disk</p></li>
+<li><p>…</p></li>
+</ul>
+</li>
+</ul>
+<figure class="align-default">
+<img alt="../../_images/filesystem-functionality.png" src="../../_images/filesystem-functionality.png" />
+</figure>
+</section>
+<section id="case-study-the-unix-v6-filesystem">
+<h2>Case Study: The Unix v6 Filesystem<a class="headerlink" href="#case-study-the-unix-v6-filesystem" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>We will use the Unix Version 6 Filesystem to see an example of filesystem design.</p>
+<ul>
+<li><p>From around 1975; well-designed, open-source filesystem.</p></li>
+<li><p>Great example of a well-thought-out, layered engineering design.</p></li>
+<li><p>Not the only filesystem design - each has tradeoffs. Modern file systems (particularly for Linux) are, in general, descendants of this file system, but they are more complex and geared towards high performance and fault tolerance.</p></li>
+<li><p>Details we discuss (e.g. “size of a sector”) are specific to this filesystem design, but general principles apply to modern operating systems.</p></li>
+<li><p>Some other filesystems are open source and viewable if you’re interested (e.g., <a class="reference external" href="https://opensource.com/article/17/5/introduction-ext4-filesystem">the ext4 filesystem</a>, which is the most common Unix file system right now).</p></li>
+<li><p>Our discussion will highlight various design questions as we go. Consider the pros/cons of this approach vs. alternatives!</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="sectors-and-blocks">
+<h2>Sectors and Blocks<a class="headerlink" href="#sectors-and-blocks" title="Link to this heading">¶</a></h2>
+<ul>
+<li><p>A filesystem generally defines its own unit of data, a “block” that it reads/writes at a time.</p>
+<ul class="simple">
+<li><p>Sector: hard disk storage unit</p></li>
+<li><p>Block: filesystem storage unit (1 or more sectors) - <strong>software abstraction</strong></p></li>
+</ul>
+<figure class="align-default" id="id2">
+<a class="reference internal image-reference" href="../../_images/filesystem-block-vs-sector.png"><img alt="../../_images/filesystem-block-vs-sector.png" src="../../_images/filesystem-block-vs-sector.png" style="width: 80%;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><cite>Example: the block size could be defined as two sectors</cite></span><a class="headerlink" href="#id2" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</li>
+<li><p>The Unix V6 Filesystem defines a block to be 1 sector (so they are interchangeable).</p></li>
+</ul>
+<div class="warning admonition">
+<p class="admonition-title">Thinking</p>
+<ul>
+<li><p>Pros of larger block size? Smaller block size?</p>
+<p>More efficient I/O if larger, but less internal fragmentation if smaller</p>
+</li>
+</ul>
+</div>
+</section>
+<section id="storing-data-on-disk">
+<h2>Storing Data on Disk<a class="headerlink" href="#storing-data-on-disk" title="Link to this heading">¶</a></h2>
+<p>Two types of data we will be working with:</p>
+<ul class="simple">
+<li><p>File payload data: contents of files (e.g. text in documents, pixels in images)</p></li>
+<li><p>File metadata: information about files (e.g. name, size)</p></li>
+</ul>
+<div class="note admonition">
+<p class="admonition-title">Key insight</p>
+<p>Both of these must be stored on the hard disk. Otherwise, we will not have it across power-offs! (E.g. without storing metadata we would lose all filenames after shutdown). <em>This means some blocks must store metadata other than payload data.</em></p>
+</div>
+<section id="file-payload-data">
+<h3>File Payload Data<a class="headerlink" href="#file-payload-data" title="Link to this heading">¶</a></h3>
+<ul>
+<li><p>Design questions to consider:</p>
+<ul>
+<li><p>How do we handle small files &lt; 512 bytes?</p>
+<p>Still reserve entire block (most do this). Reserving partial blocks may better utilize space, but more complex to implement</p>
+</li>
+<li><p>For files spanning multiple blocks, must their blocks be adjacent?</p>
+<p>No.</p>
+</li>
+</ul>
+</li>
+</ul>
+<div class="hint admonition">
+<p class="admonition-title">Fragmentation</p>
+<ul class="simple">
+<li><p><strong>Internal Fragmentation</strong>: space allocated for a file is larger than what is needed. A file may not take up all the space in the blocks it’s using. E.g. block = 512 bytes, but file is only 300 bytes. (you could share blocks between multiple files, but this gets complex)</p></li>
+<li><p><strong>External Fragmentation (issue with contiguous allocation)</strong>: no single space is large enough to satisfy an allocation request, even though enough aggregate free disk space is available</p></li>
+</ul>
+</div>
+</section>
+<section id="file-metadata">
+<h3>File Metadata<a class="headerlink" href="#file-metadata" title="Link to this heading">¶</a></h3>
+<div class="warning admonition">
+<p class="admonition-title">Problem</p>
+<p>How do we know what block numbers store a given file’s data?</p>
+<p>We need somewhere to store information about each file, such as which block numbers store its payload data. Ideally, this data would be easy to look up as needed.</p>
+</div>
+<section id="inodes">
+<h4>Inodes<a class="headerlink" href="#inodes" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>An inode (“index node”) is a grouping of data about a single file. It stores things like:</p>
+<ul>
+<li><p>file size</p></li>
+<li><p>ordered list of block numbers that store file payload data</p></li>
+</ul>
+</li>
+<li><p>An inode is 32 bytes big in this filesystem. The full definition of an inode has much more; but we focus just on size (<code class="docutils literal notranslate"><span class="pre">i_size0</span></code> and <code class="docutils literal notranslate"><span class="pre">i_size1</span></code>) and block numbers (<code class="docutils literal notranslate"><span class="pre">i_addr[8]</span></code>).</p></li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">inode</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">i_mode</span><span class="p">;</span><span class="w">     </span><span class="c1">// bit vector of file type and permissions</span>
+<span class="w">  </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">i_nlink</span><span class="p">;</span><span class="w">     </span><span class="c1">// number of references to file</span>
+<span class="w">  </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">i_uid</span><span class="p">;</span><span class="w">       </span><span class="c1">// owner</span>
+<span class="w">  </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">i_gid</span><span class="p">;</span><span class="w">       </span><span class="c1">// group of owner</span>
+<span class="w">  </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">i_size0</span><span class="p">;</span><span class="w">     </span><span class="c1">// most significant byte of size</span>
+<span class="w">  </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">i_size1</span><span class="p">;</span><span class="w">    </span><span class="c1">// lower two bytes of size (size is encoded</span>
+<span class="w">                        </span><span class="c1">// in a three-byte number)</span>
+<span class="w">  </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">i_addr</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span><span class="w">  </span><span class="c1">// device addresses constituting file</span>
+<span class="w">  </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">i_atime</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span><span class="w"> </span><span class="c1">// access time</span>
+<span class="w">  </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">i_mtime</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span><span class="w"> </span><span class="c1">// modify time</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<ul>
+<li><p>The filesystem stores inodes on disk together in the <strong>inode table</strong> for quick access.</p></li>
+<li><p>Inodes are stored in a reserved region starting at block 2 (block 0 is “boot block” containing hard drive info, block 1 is “superblock” containing filesystem info).</p>
+<p>Typically at most 10% of the drive stores metadata.</p>
+</li>
+<li><p>Filesystem goes from <strong>filename</strong> to <strong>inode number</strong> (“inumber”) to <strong>file data</strong>.</p></li>
+</ul>
+<figure class="align-default" id="id3">
+<a class="reference internal image-reference" href="../../_images/filesystem-inodes.png"><img alt="../../_images/filesystem-inodes.png" src="../../_images/filesystem-inodes.png" style="width: 95%;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><em>Example: 16 inodes fit in a single block here.</em></span><a class="headerlink" href="#id3" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<ul class="simple">
+<li><p>We need inodes to be a fixed size, and not too large. So how should we store the block numbers? How many should there be?</p>
+<ul>
+<li><p>if variable number, there’s no fixed inode size</p></li>
+<li><p>if fixed number, this limits maximum file size</p></li>
+</ul>
+</li>
+<li><p>The inode design here has space for 8 block numbers. But we will see later how we can build on this to support very large files.</p></li>
+</ul>
+</section>
+<section id="access-inodes">
+<h4>Access Inodes<a class="headerlink" href="#access-inodes" title="Link to this heading">¶</a></h4>
+<ul>
+<li><p>Let’s imagine that the hard disk creators provide software to let us interface with the disk.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">readSector</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">sectorNumber</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">writeSector</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">sectorNumber</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">);</span>
+</pre></div>
+</div>
+</li>
+<li><p>How do we access <code class="docutils literal notranslate"><span class="pre">inode</span></code>? E.g. how can we iterate over inodes 17-32?</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">inode</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">i_addr</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span><span class="w"> </span><span class="c1">// device addresses constituting file</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span><span class="w"> </span><span class="n">inode</span><span class="p">;</span>
+
+<span class="c1">// Loop over each inode in sector 2</span>
+<span class="n">inode</span><span class="w"> </span><span class="n">inodes</span><span class="p">[</span><span class="mi">512</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">inode</span><span class="p">)];</span>
+<span class="n">readSector</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">inodes</span><span class="p">);</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">inodes</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">inodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+</section>
+<section id="indirect-addressing">
+<h3>Indirect Addressing<a class="headerlink" href="#indirect-addressing" title="Link to this heading">¶</a></h3>
+<div class="warning admonition">
+<p class="admonition-title">Problem</p>
+<p>With 8 block numbers per inode, the largest a file can be is 512 * 8 = 4096 bytes (~4KB). That defifinitely isn’t realistic!</p>
+</div>
+<ul>
+<li><p>Let’s say a file’s payload is stored across 10 blocks:</p>
+<p>451, 42, 15, 67, 125, 665, 467, 231, 162, 136</p>
+</li>
+<li><p>Assuming that the size of an <code class="docutils literal notranslate"><span class="pre">inode</span></code> is fixed, where can we put these block numbers?</p>
+<p><strong>Solution</strong>: Let’s store them in a block, and then store that block’s number in the inode!</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/indirect-addressing.png"><img alt="../../_images/indirect-addressing.png" src="../../_images/indirect-addressing.png" style="width: 95%;" />
+</a>
+</figure>
+</li>
+<li><p><strong>Indirect addressing</strong> is useful, but means that it takes more steps to get to the data, and we may use more blocks than we need.</p></li>
+<li><p>Design questions:</p>
+<ul>
+<li><p>Should we make all the block numbers in an <code class="docutils literal notranslate"><span class="pre">inode</span></code> use indirect addressing?</p>
+<p><strong>Just some.</strong></p>
+</li>
+<li><p>Should we use this approach for all files, or just large ones?</p>
+<p><strong>Just large ones.</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+<section id="singly-indirect-addressing">
+<h4>Singly-Indirect Addressing<a class="headerlink" href="#singly-indirect-addressing" title="Link to this heading">¶</a></h4>
+<ul>
+<li><p>The Unix V6 filesystem uses <strong>singly-indirect addressing</strong> (blocks that store payload block numbers) just for large files.</p></li>
+<li><p>Check flag or size in <code class="docutils literal notranslate"><span class="pre">inode</span></code> to know whether it is a small file (direct addressing) or large one (indirect addressing):</p>
+<ul class="simple">
+<li><p>If small, all 8 block numbers are direct block numbers that store file data</p></li>
+<li><p>If large, <strong>first 7 block numbers</strong> are singly-indirect block numbers which stores direct block numbers for payload data</p></li>
+<li><p>8th block number? we’ll get to that.</p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/single-indirect-addressing.png"><img alt="../../_images/single-indirect-addressing.png" src="../../_images/single-indirect-addressing.png" style="width: 80%;" />
+</a>
+</figure>
+</li>
+<li><p>Let’s assume for now that an inode for a large file uses all 8 block numbers for singly indirect addressing. Each block number is 2 bytes big. What is the largest file size this supports?</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>8 (block numbers in an inode) ×
+256 (block numbers per singly-indirect block) ×
+512 (bytes per block)
+= ~1MB
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="doubly-indirect-addressing">
+<h4>Doubly-Indirect Addressing<a class="headerlink" href="#doubly-indirect-addressing" title="Link to this heading">¶</a></h4>
+<div class="warning admonition">
+<p class="admonition-title">Problem</p>
+<p>Even with singly-indirect addressing, the largest a file can be is 8 * 256 * 512 = 1,048,576 bytes (~1MB). That still isn’t realistic!</p>
+</div>
+<ul>
+<li><p><strong>Solution</strong>: Let’s have the 8th entry in <code class="docutils literal notranslate"><span class="pre">i_addr</span></code> use <em>doubly-indirect addressing</em>; store a block number for a block that contains <em>singly-indirect block numbers</em>.</p></li>
+<li><p>If the file is large, the first 7 entries in <code class="docutils literal notranslate"><span class="pre">i_addr</span></code> are singly-indirect block numbers (block numbers of blocks that contain direct block numbers). The 8th entry (if needed) is a doubly-indirect block number (the number of a block that contains singly-indirect block numbers).</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/double-indirect-addressing.png"><img alt="../../_images/double-indirect-addressing.png" src="../../_images/double-indirect-addressing.png" style="width: 80%;" />
+</a>
+</figure>
+</li>
+<li><p>The Unix V6 filesystem uses <strong>singly-indirect addressing</strong> (blocks that store payload block numbers) just for large files. It also uses <strong>doubly-indirect addressing</strong> (blocks that store singly-indirect block numbers).</p></li>
+<li><p>Check flag or size in <code class="docutils literal notranslate"><span class="pre">inode</span></code> to know whether it is a small file (direct addressing) or large one (indirect addressing):</p>
+<ul class="simple">
+<li><p>If small, all 8 block numbers are direct block numbers that store file data</p></li>
+<li><p>If large, <strong>first 7 block numbers</strong> are singly-indirect block numbers which stores direct block numbers for payload data</p></li>
+<li><p>NEW: If larger, <strong>8th block number</strong> are doubly-indirect block numbers which stores singly-indirect block numbers</p></li>
+</ul>
+</li>
+<li><p>In other words; a file can be represented using at most 256 + 7 = 263 singly-indirect blocks. The first seven are stored in the inode. The remaining 256 are stored in a block whose block number is stored in the inode.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">263</span> <span class="p">(</span><span class="n">singly</span><span class="o">-</span><span class="n">indirect</span> <span class="n">block</span> <span class="n">numbers</span> <span class="n">total</span><span class="p">)</span> <span class="n">x</span>
+<span class="mi">256</span> <span class="p">(</span><span class="n">block</span> <span class="n">numbers</span> <span class="n">per</span> <span class="n">singly</span><span class="o">-</span><span class="n">indirect</span> <span class="n">block</span><span class="p">)</span> <span class="n">x</span>
+<span class="mi">512</span> <span class="p">(</span><span class="nb">bytes</span> <span class="n">per</span> <span class="n">block</span><span class="p">)</span>
+<span class="o">=</span> <span class="o">~</span><span class="mi">34</span><span class="n">MB</span>
+</pre></div>
+</div>
+</li>
+<li><p>Better! But still not sufficient for today’s standards, but perhaps in 1975. Moreover, since block numbers are 2 bytes, we can number at most <span class="math notranslate nohighlight">\(2^{16} - 1 = 65,535\)</span> blocks, meaning the entire filesystem can be at most 65,535 * 512 ~ 32MB.</p></li>
+</ul>
+</section>
+</section>
+<section id="directory">
+<h3>Directory<a class="headerlink" href="#directory" title="Link to this heading">¶</a></h3>
+<div class="warning admonition">
+<p class="admonition-title">Problem</p>
+<p>Now we understand <strong>how files are stored</strong>, but <strong>how do we find them</strong>?</p>
+</div>
+<section id="the-directory-hierarchy">
+<h4>The Directory Hierarchy<a class="headerlink" href="#the-directory-hierarchy" title="Link to this heading">¶</a></h4>
+<ul>
+<li><p>Filesystems usually support directories (“folders”)</p></li>
+<li><p>A directory can contain files and more directories</p></li>
+<li><p>All files live within the root directory, “<code class="docutils literal notranslate"><span class="pre">/</span></code>”.</p></li>
+<li><p>We can specify the location of a file via the path to it from the root directory:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>/classes/cs103/index.html
+</pre></div>
+</div>
+</li>
+<li><p>Common filesystem task: given a filepath, get the file’s contents.</p></li>
+</ul>
+</section>
+<section id="directories-as-files">
+<h4>Directories as Files<a class="headerlink" href="#directories-as-files" title="Link to this heading">¶</a></h4>
+<div class="warning admonition">
+<p class="admonition-title">Problem</p>
+<p>How can we store directories on disk?</p>
+</div>
+<ul class="simple">
+<li><p><strong>Key idea</strong>: let’s model a directory as a file. We have already designed support for storing payloads and metadata. Why not use it?</p></li>
+<li><p>A directory is a file container. It needs to store what files/folders are contained within it. It also has associated metadata.</p>
+<ul>
+<li><p>Have an inode for each directory</p></li>
+<li><p>A directory’s “payload data” is a list of info about the files it contains</p></li>
+<li><p>A directory’s “metadata” is information about it such as its owner</p></li>
+<li><p>Inodes can store a field telling us whether something is a directory or file</p></li>
+</ul>
+</li>
+<li><p>We can layer support for directories right on top of our implementation for files!</p></li>
+</ul>
+</section>
+<section id="representing-directories">
+<h4>Representing Directories<a class="headerlink" href="#representing-directories" title="Link to this heading">¶</a></h4>
+<ul>
+<li><p><strong>Design decision</strong>: the Unix V6 filesystem makes directory payloads contain a 16 byte entry for each file/folder that is in that directory.</p>
+<ul class="simple">
+<li><p>The first 14 bytes are the name (not necessarily null-terminated!)</p></li>
+<li><p>The last two bytes are the inumber</p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../_images/dir-rep.png"><img alt="../../_images/dir-rep.png" src="../../_images/dir-rep.png" style="width: 60%;" />
+</a>
+</figure>
+</li>
+</ul>
+</section>
+<section id="the-lookup-process">
+<h4>The Lookup Process<a class="headerlink" href="#the-lookup-process" title="Link to this heading">¶</a></h4>
+<ul>
+<li><p>Given the inode for a directory, how could we find the inumber for a file it contains called “b.txt”?</p>
+<figure class="align-default">
+<img alt="../../_images/the-lookup-process.png" src="../../_images/the-lookup-process.png" />
+</figure>
+</li>
+<li><p>The lookup process for <code class="docutils literal notranslate"><span class="pre">/classes/cs103/index.html</span></code>:</p>
+<ul class="simple">
+<li><p>Start at the root directory <code class="docutils literal notranslate"><span class="pre">/</span></code></p></li>
+<li><p>In the root directory, find the entry named “classes”.</p></li>
+<li><p>In the “classes” directory, find the entry named “cs103”.</p></li>
+<li><p>In the “cs103” directory, find the entry named “index.html”. Then read its contents.</p></li>
+</ul>
+</li>
+<li><p>The root directory (”<code class="docutils literal notranslate"><span class="pre">/</span></code>”) is set to have inumber 1.  That way we always know where to go to start traversing.  (0 <a class="reference external" href="http://stackoverflow.com/questions/2099121/why-do-inode-numbers-start-from-1-and-not-0">is reserved</a> to mean “NULL” or “no inode”).</p>
+<ul class="simple">
+<li><p>Go to <code class="docutils literal notranslate"><span class="pre">inode</span></code> with inumber 1 (root directory).</p></li>
+<li><p>In its payload data, look for the entry “classes” and get its <code class="docutils literal notranslate"><span class="pre">inumber</span></code>. Go to that <code class="docutils literal notranslate"><span class="pre">inode</span></code>.</p></li>
+<li><p>In its payload data, look for the entry “cs103” and get its inumber. Go to that <code class="docutils literal notranslate"><span class="pre">inode</span></code>.</p></li>
+<li><p>In its payload data, look for the entry “index.html” and get its <code class="docutils literal notranslate"><span class="pre">inumber</span></code>. Go to that <code class="docutils literal notranslate"><span class="pre">inode</span></code> and read in its payload data.</p></li>
+</ul>
+</li>
+</ul>
+<div class="note admonition">
+<p class="admonition-title">Key idea</p>
+<p>Unix V6 directories are what map filenames to inode numbers in the filesystem. Filenames are not stored in inodes; they are stored in directories. Thefore, file lookup must happen via directories.</p>
+</div>
+</section>
+</section>
+</section>
+<section id="hard-soft-links">
+<h2>Hard/Soft Links<a class="headerlink" href="#hard-soft-links" title="Link to this heading">¶</a></h2>
+<section id="hard-links">
+<h3>Hard Links<a class="headerlink" href="#hard-links" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>It’s possible for two different filenames to resolve to the same <code class="docutils literal notranslate"><span class="pre">inumber</span></code>.</p></li>
+<li><p>Useful if you want multiple copies of a file without having to duplicate its contents.</p></li>
+<li><p>If you change the contents of one, the contents of all of them change.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">inode</span></code> stores the number of names that resolve to that <code class="docutils literal notranslate"><span class="pre">inode</span></code>, <code class="docutils literal notranslate"><span class="pre">i_nlink</span></code>. When that number is 0, and no programs are reading it, the file is deleted.</p></li>
+<li><p>What we are describing here is called a <strong>hard link</strong>. All normal files in Unix (and Linux) are hard links, and two hard links are indistinguishable as far as the file they point to is concerned. In other words, there is no “real” filename, as both file names point to the same <code class="docutils literal notranslate"><span class="pre">inode</span></code>.</p></li>
+<li><p>In Unix, you can create a link using the <code class="docutils literal notranslate"><span class="pre">ln</span></code> command.</p></li>
+</ul>
+</section>
+<section id="soft-links">
+<h3>Soft Links<a class="headerlink" href="#soft-links" title="Link to this heading">¶</a></h3>
+<ul>
+<li><p>In addition to hard links, the Unix filesystem has the ability to create <strong>soft links</strong>. A soft link is a special file that contains the path of another file, and has no reference to the <code class="docutils literal notranslate"><span class="pre">inumber</span></code>.</p></li>
+<li><p>Soft links can “break” in the sense that if the path they refer to is gone (e.g., the file is actually removed from the disk), then the link will no longer work.</p></li>
+<li><p>To create a soft link in Unix, use the <code class="docutils literal notranslate"><span class="pre">-s</span></code> flag with <code class="docutils literal notranslate"><span class="pre">ln</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>cs103@stickmind:/tmp$ echo &quot;This is some text in a file&quot; &gt; file1
+cs103@stickmind:/tmp$ ls -l file*
+-rw------- 1 cs103 operator 28 Sep 27 09:57 file1
+cs103@stickmind:/tmp$ ln -s file1 file2
+cs103@stickmind:/tmp$ ls -l file*
+-rw------- 1 cs103 operator 28 Sep 27 09:57 file1
+lrwxrwxrwx 1 cs103 operator 5 Sep 27 09:58 file2 -&gt; file1
+cs103@stickmind:/tmp$ echo &quot;Here is some more text.&quot; &gt;&gt; file2
+cs103@stickmind:/tmp$ cat file1
+This is some text in a file
+Here is some more text.
+cs103@stickmind:/tmp$ rm file1
+rm: remove regular file &#39;file1&#39;? y
+cs103@stickmind:/tmp$ ls -l file*
+lrwxrwxrwx 1 cs103 operator 5 Sep 27 09:58 file2 -&gt; file1
+cs103@stickmind:/tmp$ cat file2
+cat: file2: No such file or directory
+cs103@stickmind:/tmp$
+</pre></div>
+</div>
+</li>
+<li><p>When we create a soft link, <code class="docutils literal notranslate"><span class="pre">ls</span></code> gives us the path to the original file</p></li>
+<li><p>But, the reference count for the original file remains unchanged</p></li>
+<li><p>Again, changing the contents of the file via either filename changes the file.</p></li>
+<li><p>If we delete the original file, the soft link breaks! The soft link remains, but the path it refers to is no longer valid. If we had removed the soft link before the file, the original file would still remain.</p></li>
+</ul>
+</section>
+</section>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>The Unix V6 Filesystem is a well-engineered filesystem that makes many design decisions for how to represent files and directories.</p>
+<ul>
+<li><p>Every file has an inode (stores block numbers and other metadata)</p>
+<ul>
+<li><p>“small” (up to 8 direct) or “large” (up to 7 singly-indirect and 1 doubly-indirect)</p></li>
+</ul>
+</li>
+<li><p>Every directory also has an inode. Directories store directory entries.</p>
+<ul>
+<li><p>Directory entry = inumber + name</p></li>
+</ul>
+</li>
+<li><p>We leverage directories to look up by name</p></li>
+<li><p>For looking up by absolute path, we start at root directory (inumber 1)</p></li>
+</ul>
+</li>
+</ul>
+<hr class="docutils" />
+<p>Enjoy!</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../filesystem-2/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>下一页</span>
+                </div>
+                <div class="title">Filesystem System Call</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>上一页</span>
+                </div>
+                
+                <div class="title">Overview of Unix Filesystems</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, <a href='https://www.stickmind.com/' target="_blank">StickMind</a>
+            </div>
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            本页目录
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Filesystem Design</a><ul>
+<li><a class="reference internal" href="#data-storage-and-access">Data Storage and Access</a><ul>
+<li><a class="reference internal" href="#sector-addressable">Sector-Addressable</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#filesystem-goals">Filesystem Goals</a></li>
+<li><a class="reference internal" href="#case-study-the-unix-v6-filesystem">Case Study: The Unix v6 Filesystem</a></li>
+<li><a class="reference internal" href="#sectors-and-blocks">Sectors and Blocks</a></li>
+<li><a class="reference internal" href="#storing-data-on-disk">Storing Data on Disk</a><ul>
+<li><a class="reference internal" href="#file-payload-data">File Payload Data</a></li>
+<li><a class="reference internal" href="#file-metadata">File Metadata</a><ul>
+<li><a class="reference internal" href="#inodes">Inodes</a></li>
+<li><a class="reference internal" href="#access-inodes">Access Inodes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indirect-addressing">Indirect Addressing</a><ul>
+<li><a class="reference internal" href="#singly-indirect-addressing">Singly-Indirect Addressing</a></li>
+<li><a class="reference internal" href="#doubly-indirect-addressing">Doubly-Indirect Addressing</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#directory">Directory</a><ul>
+<li><a class="reference internal" href="#the-directory-hierarchy">The Directory Hierarchy</a></li>
+<li><a class="reference internal" href="#directories-as-files">Directories as Files</a></li>
+<li><a class="reference internal" href="#representing-directories">Representing Directories</a></li>
+<li><a class="reference internal" href="#the-lookup-process">The Lookup Process</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#hard-soft-links">Hard/Soft Links</a><ul>
+<li><a class="reference internal" href="#hard-links">Hard Links</a></li>
+<li><a class="reference internal" href="#soft-links">Soft Links</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#summary">Summary</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=7d86a446"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/tabs.js?v=3ee01567"></script>
+    <script>let toggleHintShow = '';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+    </body>
+</html>
